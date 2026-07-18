@@ -220,4 +220,116 @@ mod tests {
             vec!["droneId".to_string(), "missionId".to_string()]
         );
     }
+
+    #[test]
+    fn builds_operations_from_explicit_operation_messages() {
+        let input = r##"
+asyncapi: 3.0.0
+channels:
+  telemetry:
+    address: tenants/{tenantId}/drones/{droneId}/telemetry
+operations:
+  publishTelemetry:
+    action: send
+    channel:
+      $ref: '#/channels/telemetry'
+    message:
+      $ref: '#/messages/telemetryPayload'
+    bindings:
+      mqtt:
+        qos: 2
+messages:
+  telemetryPayload:
+    payload:
+      type: object
+      properties:
+        battery:
+          type: number
+"##;
+
+        let document = crate::parser::parse_asyncapi(input).expect("valid document");
+        let spec = ClientSpec::from_document(&document).expect("valid spec");
+
+        assert_eq!(spec.operations.len(), 1);
+        let operation = &spec.operations[0];
+        assert_eq!(operation.name, "publishTelemetry");
+        assert_eq!(operation.action, Action::Send);
+        assert_eq!(
+            operation
+                .topic
+                .parameters
+                .iter()
+                .map(|p| p.name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["tenantId", "droneId"]
+        );
+        assert_eq!(operation.qos, Some(2));
+        assert_eq!(operation.payload_type_name, "PublishTelemetryPayload");
+    }
+
+    #[test]
+    fn resolves_channel_message_when_operation_has_no_message() {
+        let input = r##"
+asyncapi: 3.0.0
+channels:
+  command:
+    address: drones/{droneId}/command
+    messages:
+      command:
+        $ref: '#/messages/command'
+    bindings:
+      mqtt:
+        qos: 1
+operations:
+  receiveCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/command'
+messages:
+  command:
+    payload:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+"##;
+
+        let document = crate::parser::parse_asyncapi(input).expect("valid document");
+        let spec = ClientSpec::from_document(&document).expect("valid spec");
+
+        let operation = &spec.operations[0];
+        assert_eq!(operation.action, Action::Receive);
+        assert_eq!(operation.qos, Some(1));
+        assert_eq!(operation.payload_schema["required"][0], "command");
+    }
+
+    #[test]
+    fn rejects_unsupported_operation_actions() {
+        let input = r##"
+asyncapi: 3.0.0
+channels:
+  telemetry:
+    address: drones/telemetry
+operations:
+  consumeTelemetry:
+    action: consume
+    channel:
+      $ref: '#/channels/telemetry'
+messages:
+  telemetry:
+    payload:
+      type: object
+"##;
+
+        let document = crate::parser::parse_asyncapi(input).expect("valid document");
+        let error = ClientSpec::from_document(&document).expect_err("invalid action");
+
+        assert!(matches!(
+            error,
+            Error::UnsupportedOperationAction(operation, action)
+                if operation == "consumeTelemetry" && action == "consume"
+        ));
+    }
 }
