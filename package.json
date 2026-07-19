@@ -1,0 +1,43 @@
+{
+  "name": "asyncapi-mqtt",
+  "version": "0.1.0",
+  "description": "Generate type-safe TypeScript MQTT clients from AsyncAPI",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.14.0",
+  "bin": {
+    "asyncapi-mqtt": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/myzkey/asyncapi-mqtt.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "node scripts/lint.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "pack:dry-run": "pnpm pack --dry-run",
+    "smoke": "node scripts/smoke-test.js"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

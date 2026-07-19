@@ -2,7 +2,7 @@
 
 Generate a type-safe TypeScript MQTT client from an AsyncAPI 3.x document.
 
-`asyncapi-mqtt` is an **Orval for AsyncAPI** style CLI for projects that define MQTT topics and JSON payloads with AsyncAPI, then want a typed client API instead of hand-written `mqtt.js` calls.
+`asyncapi-mqtt` is an **Orval for AsyncAPI** style CLI for projects that define MQTT topics and JSON payloads with AsyncAPI, then want a typed MQTT client instead of hand-written `mqtt.js` calls.
 
 ```ts
 import { createClient } from "./generated/client";
@@ -25,29 +25,30 @@ await client.publish.sendTelemetry(
 ## Features
 
 - AsyncAPI 3.x input
-- MQTT client generation for TypeScript
-- `mqtt.js` based runtime
+- YAML and JSON documents
+- TypeScript MQTT client generation
+- `mqtt.js` based generated runtime
 - Type-safe `publish` and `subscribe` APIs
 - Topic parameter expansion such as `drones/{droneId}/telemetry`
-- JSON Schema to TypeScript type generation
+- JSON Schema to TypeScript type generation for common schema shapes
 - Ajv runtime payload validation
 - Basic QoS support from MQTT bindings
 
 ## Installation
 
-Install the generator CLI:
+Install the CLI in a Node.js or TypeScript project:
 
 ```bash
-cargo install asyncapi-mqtt
+npm install -D asyncapi-mqtt
 ```
 
-When working from this repository before the package is published:
+Generate a client:
 
 ```bash
-cargo install --path .
+npx asyncapi-mqtt generate ./asyncapi.yaml
 ```
 
-Install the runtime dependencies in the TypeScript application that will use the generated client:
+The generated TypeScript client uses `mqtt.js` and Ajv at runtime. Install these in the application that uses the generated files:
 
 ```bash
 npm install mqtt ajv
@@ -88,7 +89,7 @@ messages:
 Generate the client:
 
 ```bash
-asyncapi-mqtt generate ./asyncapi.yaml
+npx asyncapi-mqtt generate ./asyncapi.yaml
 ```
 
 This writes:
@@ -128,7 +129,7 @@ By default, files are generated into `generated/`.
 Use `--output` to choose another directory:
 
 ```bash
-asyncapi-mqtt generate ./asyncapi.yaml --output ./src/generated/mqtt
+npx asyncapi-mqtt generate ./asyncapi.yaml --output ./src/generated/mqtt
 ```
 
 ## Subscribe Example
@@ -297,6 +298,55 @@ examples/drone/asyncapi.yaml
 Generate them with:
 
 ```bash
-asyncapi-mqtt generate examples/basic/asyncapi.yaml --output examples/basic/generated
-asyncapi-mqtt generate examples/drone/asyncapi.yaml --output examples/drone/generated
+npx asyncapi-mqtt generate examples/basic/asyncapi.yaml --output examples/basic/generated
+npx asyncapi-mqtt generate examples/drone/asyncapi.yaml --output examples/drone/generated
 ```
+
+## Development
+
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Check the local CLI:
+
+```bash
+pnpm build
+node ./dist/cli.js generate ./examples/basic/asyncapi.yaml
+```
+
+Check npm package contents:
+
+```bash
+pnpm pack --dry-run
+```
+
+Run the tarball smoke test:
+
+```bash
+pnpm build
+pnpm smoke
+```
+
+## Release
+
+The npm package is a single package named `asyncapi-mqtt`.
+
+Before publishing:
+
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm pack --dry-run
+```
+
+The publish workflow checks that a `vX.Y.Z` tag matches `package.json` version, then runs lint, typecheck, tests, build, pack dry-run, and `npm publish --provenance`.
+
+For the first publish, make sure the npm user account has permission to publish the unscoped `asyncapi-mqtt` package. If Trusted Publishing is not configured yet, set an `NPM_TOKEN` repository secret with publish permissions.
