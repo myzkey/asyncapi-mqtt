@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint": "node scripts/lint.js",
+    "lint": "oxlint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "pack:dry-run": "pnpm pack --dry-run",
@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "oxlint": "^1.74.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { mkdtemp } from "node:fs/promises";
@@ -37,7 +37,6 @@ describe("generator", () => {
 
   it("writes client.ts and types.ts", async () => {
     const dir = await mkdtemp(join(tmpdir(), "asyncapi-mqtt-generator-"));
-    await mkdir(dir, { recursive: true });
 
     await writeGeneratedFiles(spec, dir);
 

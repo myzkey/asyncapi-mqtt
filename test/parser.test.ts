@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { mkdtemp } from "node:fs/promises";
@@ -41,7 +41,6 @@ describe("parseDocumentFile", () => {
 
   it("reads YAML from disk", async () => {
     const dir = await mkdtemp(join(tmpdir(), "asyncapi-mqtt-parser-"));
-    await mkdir(dir, { recursive: true });
     const file = join(dir, "asyncapi.yaml");
     await writeFile(file, basicYaml);
 

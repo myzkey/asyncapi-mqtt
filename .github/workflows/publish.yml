@@ -32,6 +32,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm pack --dry-run
+      - run: pnpm smoke
       - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

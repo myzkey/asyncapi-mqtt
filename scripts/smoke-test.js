@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -13,7 +13,7 @@ try {
   execFileSync("pnpm", ["pack", "--pack-destination", tempDir], { cwd: repoRoot, stdio: "inherit" });
   const tarball = join(tempDir, `asyncapi-mqtt-${packageJson.version}.tgz`);
   const appDir = join(tempDir, "app");
-  await import("node:fs/promises").then(({ mkdir }) => mkdir(appDir));
+  await mkdir(appDir);
   execFileSync("npm", ["init", "-y"], { cwd: appDir, stdio: "ignore" });
   execFileSync("npm", ["install", "--save-dev", tarball], { cwd: appDir, stdio: "inherit" });
   execFileSync("npx", ["asyncapi-mqtt", "--help"], { cwd: appDir, stdio: "inherit" });
